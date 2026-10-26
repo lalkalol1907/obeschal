@@ -79,7 +79,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let panel = capturePanel else { return }
         if !panel.isVisible {
             returnToOverview = overviewWindow?.isVisible == true
-            center(panel)
+            if let screen = screenAtCursor {
+                panel.setFrame(model.capturePosition.frame(for: panel.frame.size, in: screen.visibleFrame), display: false)
+            }
         }
         overviewWindow?.orderOut(nil)
         settingsWindow?.orderOut(nil)
@@ -118,7 +120,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         capturePanel?.orderOut(nil)
         overviewWindow?.orderOut(nil)
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 470, height: 300),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 470, height: 420),
                 styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "Настройки «Обещал»"
             window.identifier = NSUserInterfaceItemIdentifier("obeshchal.settings")
@@ -148,12 +150,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let panel = capturePanel, size.height.isFinite, size.height > 0 else { return }
         let height = max(220, size.height)
         guard abs(panel.frame.height - height) > 0.5 else { return }
-        var frame = panel.frame
-        frame.origin.y = frame.maxY - height
-        frame.size = NSSize(width: 440, height: height)
-        if let screen = panel.screen, frame.minY < screen.visibleFrame.minY {
-            frame.origin.y = screen.visibleFrame.minY
-        }
+        guard let screen = panel.screen ?? screenAtCursor else { return }
+        let frame = model.capturePosition.frame(for: NSSize(width: 440, height: height), in: screen.visibleFrame)
         panel.setFrame(frame, display: true, animate: panel.isVisible)
     }
 
@@ -164,10 +162,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func center(_ window: NSWindow) {
-        guard let screen = NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) }) ?? NSScreen.main else { return }
+        guard let screen = screenAtCursor else { return }
         let area = screen.visibleFrame
         window.setFrameOrigin(NSPoint(x: area.midX - window.frame.width / 2,
             y: max(area.minY, area.midY - window.frame.height / 2)))
+    }
+
+    private var screenAtCursor: NSScreen? {
+        NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) }) ?? NSScreen.main
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {

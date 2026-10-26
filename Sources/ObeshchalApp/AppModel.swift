@@ -19,6 +19,9 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var infoMessage: String?
     @Published var activeSurface: AppSurface = .capture
+    @Published var capturePosition: CapturePosition = .center {
+        didSet { defaults.set(capturePosition.rawValue, forKey: "capturePosition") }
+    }
     @Published private(set) var isReadOnly = false
     @Published private(set) var hotKeyCode: UInt32
     @Published private(set) var hotKeyModifiers: UInt32
@@ -59,6 +62,7 @@ final class AppModel: ObservableObject {
         activeWorkspaceID = initial.workspaces.first(where: { $0.id == savedSpace })?.id ?? initial.workspaces[0].id
         hotKeyCode = (defaults.object(forKey: "hotKeyCode") as? NSNumber)?.uint32Value ?? GlobalHotKey.defaultKeyCode
         hotKeyModifiers = (defaults.object(forKey: "hotKeyModifiers") as? NSNumber)?.uint32Value ?? GlobalHotKey.defaultModifiers
+        capturePosition = CapturePosition(rawValue: defaults.string(forKey: "capturePosition") ?? "") ?? .center
         if let loadingError {
             isReadOnly = true
             errorMessage = "Не удалось открыть хранилище. Файл не изменён. Можно импортировать резервную копию.\n\(storeURL.path)\n\n\(loadingError.localizedDescription)"

@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import ObeshchalCore
 import SwiftUI
 
 private typealias ViewState<Value> = SwiftUI.State<Value>
@@ -38,6 +39,25 @@ struct SettingsView: View {
                     shortcutHint = "Сочетание по умолчанию восстановлено."
                 }
             }
+            Divider()
+
+            Section {
+                Picker("Положение", selection: $model.capturePosition) {
+                    ForEach(CapturePosition.allCases) { position in
+                        Text(position.title).tag(position)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Text("На экране, где находится курсор. Положение применяется при следующем открытии.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } header: {
+                Text("Всплывающее окно")
+                    .font(.headline)
+            }
+
             Divider()
             Text("Все обещания хранятся на этом Mac. Для резервной копии используйте экспорт в главном окне.")
                 .font(.caption)
