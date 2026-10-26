@@ -4,6 +4,14 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "$0")/.." && pwd)"
 cd "$ROOT"
 
+APP_VERSION="${APP_VERSION:-1.0.0}"
+APP_BUILD_NUMBER="${APP_BUILD_NUMBER:-1}"
+VERSION_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+if [[ ! "$APP_VERSION" =~ $VERSION_PATTERN || ! "$APP_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+    echo "APP_VERSION должен иметь вид 1.2.3, APP_BUILD_NUMBER — положительное целое число." >&2
+    exit 1
+fi
+
 mkdir -p .build/module-cache .build/cache .build/config .build/security
 export CLANG_MODULE_CACHE_PATH="$ROOT/.build/module-cache"
 export SWIFTPM_MODULECACHE_OVERRIDE="$ROOT/.build/module-cache"
@@ -36,6 +44,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VERSION" "$APP/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $APP_BUILD_NUMBER" "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
 codesign --force --sign - "$APP"
 codesign --verify --strict "$APP"
