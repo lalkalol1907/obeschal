@@ -25,7 +25,7 @@ cd "$ROOT"
 APP_VERSION="$APP_VERSION" APP_BUILD_NUMBER="$APP_BUILD_NUMBER" ./scripts/build-app.sh
 APP="$ROOT/dist/Обещал.app"
 codesign --verify --deep --strict "$APP"
-lipo -verify_arch "$ARCH" "$APP/Contents/MacOS/Obeshchal"
+lipo "$APP/Contents/MacOS/Obeshchal" -verify_arch "$ARCH"
 
 STAGE_ROOT="$ROOT/.build/release-stage"
 mkdir -p "$STAGE_ROOT"
