@@ -1,0 +1,27 @@
+.DS_Store
+.build/
+.swiftpm/
+dist/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+.idea/
+.vscode/
+*.log
+
+# Local configuration and signing credentials.
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+
+# Personal data and exports accidentally saved in the project root.
+/promises.json
+/Обещал-*.json
+/Obeshchal-*.json
+*.backup-*.json
